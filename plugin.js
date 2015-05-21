@@ -18,6 +18,18 @@ function zeroPad (num, numZeros) {
 
 module.exports = {
     init: function (client, deps) {
+        var search = null;
+
+        try {
+            const blob = require('fs').readFileSync(__dirname + '/search-index.json', 'utf8');
+            const search_index = JSON.parse(blob);
+
+            search = require("./search")(search_index);
+        } catch (e) {
+            client.error("PluginRustHelp", err.name);
+            client.error("PluginRustHelp", err.stack);
+        }
+
         return {
             handlers: {
                 "!crate": function (command) {
@@ -77,10 +89,36 @@ module.exports = {
                     }
 
                     return format("https://doc.rust-lang.org/error-index.html#E%s", zeroPad(error, 4));
+                },
+
+                "!rustdoc": function (command) {
+                    if (search === null) {
+                        return "Search unavailable :(";
+                    }
+
+                    if (command.args.length === 0) {
+                        return "Usage: !rustdoc <query>";
+                    }
+
+                    const query = command.args.join(" ");
+                    const max_results = 3;
+                    const results = search(query, max_results);
+
+                    if (results.length === 0) {
+                        return "No results :(";
+                    }
+
+                    var msg_parts = [];
+                    results.forEach(function(result) {
+                        // TODO(whipsch): shorten URLs (and cache them!)
+                        msg_parts.push(format("%s: %s", result.display, result.url));
+                    });
+
+                    return msg_parts.join(", ");
                 }
             },
 
-            commands: ["crate", "error"],
+            commands: ["crate", "error", "rustdoc"],
 
             help: {
                 "crate": [
@@ -94,6 +132,13 @@ module.exports = {
                     "",
                     "Return link to the specified error.",
                     "Ex: {{!}}error 303"
+                ],
+
+                "rustdoc": [
+                    "{{!}}rustdoc <query>",
+                    "",
+                    "Return links to the top 3 matches of <query> in rustdoc.",
+                    "Ex: {{!}}rustdoc Vec"
                 ]
             }
         };
