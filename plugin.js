@@ -25,7 +25,7 @@ module.exports = {
             const search_index = JSON.parse(blob);
 
             search = require("./search")(search_index);
-        } catch (e) {
+        } catch (err) {
             client.error("PluginRustHelp", err.name);
             client.error("PluginRustHelp", err.stack);
         }

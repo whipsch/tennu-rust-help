@@ -6,6 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "bin": {
+    "tennu-rust-help-update-rustdoc": "./bin/update-rustdoc.sh"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/Havvy/tennu-rust-help.git"

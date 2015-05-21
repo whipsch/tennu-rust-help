@@ -217,6 +217,11 @@ function initSearch(rawSearchIndex) {
       b = (bbb.lev);
       if (a !== b) return a - b;
 
+      // sort by crate (non-current crate goes later)
+      a = (aaa.item.crate !== 'std');
+      b = (bbb.item.crate !== 'std');
+      if (a !== b) return a - b;
+
       // sort by exact match (mismatch goes later)
       a = (aaa.word !== valLower);
       b = (bbb.word !== valLower);
@@ -388,6 +393,10 @@ function initSearch(rawSearchIndex) {
         continue
       }
 
+      if (crate === 'CRAPPY_SENTINEL') {
+        continue;
+      }
+
       // an array of [(Number) item type,
       //              (String) name,
       //              (String) full path or empty string for previous path,
@@ -457,7 +466,7 @@ function initSearch(rawSearchIndex) {
           displayPath = item.path + '::';
           href = rootPath + item.path.replace(/::/g, '/') + '/' +
                  name + '/index.html';
-        } else if (type === 'static' || type === 'rexport') {
+        } else if (type === 'static' || type === 'reexport') {
           displayPath = item.path + '::';
           url = rootPath + item.path.replace(/::/g, '/') +
                 '/index.html';
